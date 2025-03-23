@@ -16,71 +16,341 @@
           display: flex;
           flex-direction: column;
           font-family: Arial, sans-serif;
+          background-color: #222;
+          color: white;
       }
 
       .dashboard {
           display: flex;
           flex-direction: column;
           flex: 1;
+          height: 100vh; /* Use a altura total da viewport */
+      }
+
+      .light-control {
+          border-bottom: 1px solid #444;
+          overflow: hidden;
+          flex: 1; /* Distribui igualmente o espaço vertical */
+          display: flex;
+          flex-direction: column;
       }
 
       .button {
-          flex: 1;
+          width: 100%;
+          height: 100%; /* Usar altura total disponível */
           border: none;
-          font-size: 24px;
+          font-size: 28px; /* Fonte maior */
+          font-weight: bold;
           cursor: pointer;
           transition: background-color 0.3s;
           padding: 20px;
           display: flex;
           align-items: center;
           justify-content: center;
+          flex: 1; /* Expande para preencher o espaço disponível */
       }
 
       .button.on {
-          background-color: #444 !important;
+          background-color: #444;
           color: white;
       }
 
       .button.off {
           background-color: #333;
+          color: #aaa;
+      }
+
+      .controls {
+          padding: 20px;
+          background-color: #2a2a2a;
+          display: flex;
+          flex-direction: column;
+          gap: 25px; /* Mais espaço entre os sliders */
+          max-height: 0;
+          transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
+          overflow: hidden;
+          padding-top: 0;
+          padding-bottom: 0;
+      }
+
+      .controls.visible {
+          max-height: 200px;
+          padding-top: 20px;
+          padding-bottom: 20px;
+      }
+
+      .slider-container {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+      }
+
+      .slider-label {
+          display: flex;
+          justify-content: space-between;
+          font-size: 14px;
+      }
+
+      .slider {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 20px; /* Aumentei a altura do slider */
+          background: #444;
+          border-radius: 10px; /* Bordas mais arredondadas */
+          outline: none;
+      }
+
+      .slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 40px; /* Thumb maior */
+          height: 40px; /* Thumb maior */
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 0 5px rgba(0,0,0,0.5); /* Sombra para destacar */
+      }
+
+      .brightness-slider::-webkit-slider-thumb {
+          background: #f1c40f;
+      }
+
+      .temperature-slider::-webkit-slider-thumb {
+          background: #3498db;
+      }
+
+      .brightness-slider::-moz-range-thumb {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: #f1c40f;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      }
+
+      .temperature-slider::-moz-range-thumb {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: #3498db;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      }
+
+      .slider-value {
+          min-width: 40px;
+          text-align: right;
+      }
+
+      /* Estilo para o overlay de inatividade */
+      #idle-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #000;
+          display: none;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+          cursor: pointer;
+      }
+
+      #idle-overlay img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: cover;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+      }
+
+      #idle-message {
+          position: relative;
+          z-index: 1001;
           color: white;
-      }
-
-      #leitura {
-          background-color: #333;
-      }
-
-      #bar {
-          background-color: #333;
-      }
-
-      #balcao {
-          background-color: #333;
+          font-size: 32px;
+          font-weight: bold;
+          text-align: center;
+          padding: 20px;
+          background-color: rgba(0, 0, 0, 0.6);
+          border-radius: 10px;
+          margin: 20px;
       }
   </style>
 </head>
 <body>
 <div class="dashboard">
-  <button id="leitura" class="button off" value="192.168.1.250">Leitura</button>
-  <button id="bar" class="button off" value="192.168.1.147">Bar</button>
-  <button id="balcao" class="button off" value="192.168.1.109">Balcão</button>
+  <div class="light-control">
+    <button id="leitura" class="button off" data-ip="192.168.1.250">Leitura</button>
+    <div class="controls" id="leitura-controls">
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Brilho</span>
+          <span class="slider-value" id="leitura-brightness-value">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" class="slider brightness-slider" id="leitura-brightness">
+      </div>
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Temperatura</span>
+          <span class="slider-value" id="leitura-temperature-value">3500K</span>
+        </div>
+        <input type="range" min="2200" max="6500" value="3500" class="slider temperature-slider" id="leitura-temperature">
+      </div>
+    </div>
+  </div>
+
+  <div class="light-control">
+    <button id="bar" class="button off" data-ip="192.168.1.147">Bar</button>
+    <div class="controls" id="bar-controls">
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Brilho</span>
+          <span class="slider-value" id="bar-brightness-value">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" class="slider brightness-slider" id="bar-brightness">
+      </div>
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Temperatura</span>
+          <span class="slider-value" id="bar-temperature-value">3500K</span>
+        </div>
+        <input type="range" min="2200" max="6500" value="3500" class="slider temperature-slider" id="bar-temperature">
+      </div>
+    </div>
+  </div>
+
+  <div class="light-control">
+    <button id="balcao" class="button off" data-ip="192.168.1.110">Balcão</button>
+    <div class="controls" id="balcao-controls">
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Brilho</span>
+          <span class="slider-value" id="balcao-brightness-value">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" class="slider brightness-slider" id="balcao-brightness">
+      </div>
+      <div class="slider-container">
+        <div class="slider-label">
+          <span>Temperatura</span>
+          <span class="slider-value" id="balcao-temperature-value">3500K</span>
+        </div>
+        <input type="range" min="2200" max="6500" value="3500" class="slider temperature-slider" id="balcao-temperature">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay de inatividade -->
+<div id="idle-overlay">
+  <img src="./overlay.jpg" alt="Home Automation Background">
+  <div id="idle-message">Toque para controlar as lâmpadas</div>
 </div>
 
 <script>
+  // Configuração do timeout de inatividade (5 minutos = 300000ms)
+  const IDLE_TIMEOUT = 5 * 60 * 1000;
+  let idleTimer = null;
+  const idleOverlay = document.getElementById('idle-overlay');
+
+  // Função para resetar o timer
+  function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(showIdleOverlay, IDLE_TIMEOUT);
+    hideIdleOverlay();
+  }
+
+  // Função para mostrar o overlay
+  function showIdleOverlay() {
+    idleOverlay.style.display = 'flex';
+  }
+
+  // Função para esconder o overlay
+  function hideIdleOverlay() {
+    idleOverlay.style.display = 'none';
+  }
+
+  // Eventos para detectar atividade do usuário
+  const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+  activityEvents.forEach(event => {
+    document.addEventListener(event, resetIdleTimer, false);
+  });
+
+  // Iniciar o timer quando a página carrega
+  window.addEventListener('load', resetIdleTimer, false);
+
+  // Evento de clique no overlay para retornar ao dashboard
+  idleOverlay.addEventListener('click', resetIdleTimer);
+
+
   document.querySelectorAll('.button').forEach(button => {
-    button.addEventListener('click', function () {
+    // Toggle controls visibility on button click
+    button.addEventListener('click', function() {
+      const controlsId = `${this.id}-controls`;
+      const controls = document.getElementById(controlsId);
+      controls.classList.toggle('visible');
+
+      // Toggle light on/off state
       this.classList.toggle('on');
       this.classList.toggle('off');
 
-      // Here you would typically send a request to your home automation system
-      console.log(`${this.id} light is now ${this.classList.contains('on') ? 'ON' : 'OFF'}`);
-      const on = this.classList.contains('on');
-      const ip = this.value;
-      fetch(`http://192.168.1.100:19999/?ip=${ip}&on=${+on}`)
-        .then(response => response.json())
-        .then(data => console.log(data));
+      callApi(button);
+      resetIdleTimer(); // Reset do timer ao interagir com os botões
     });
   });
+
+  // Handle brightness sliders
+  document.querySelectorAll('.brightness-slider').forEach(slider => {
+    const valueDisplay = document.getElementById(`${slider.id}-value`);
+
+    // Update value display on slider change
+    slider.addEventListener('input', function() {
+      valueDisplay.textContent = `${this.value}%`;
+      resetIdleTimer(); // Reset do timer ao mover os sliders
+    });
+
+    // Send brightness value when slider is released
+    slider.addEventListener('change', function() {
+      const lightId = this.id.split('-')[0];
+      const button = document.getElementById(lightId);
+      callApi(button);
+    });
+  });
+
+  // Handle temperature sliders
+  document.querySelectorAll('.temperature-slider').forEach(slider => {
+    const valueDisplay = document.getElementById(`${slider.id}-value`);
+
+    // Update value display on slider change
+    slider.addEventListener('input', function() {
+      valueDisplay.textContent = `${this.value}K`;
+      resetIdleTimer(); // Reset do timer ao mover os sliders
+    });
+
+    // Send temperature value when slider is released
+    slider.addEventListener('change', function() {
+      const lightId = this.id.split('-')[0];
+      const button = document.getElementById(lightId);
+      callApi(button);
+    });
+  });
+
+  function callApi(button) {
+    const ip = button.getAttribute('data-ip');
+    const status = button.classList.contains('on') ? 'on' : 'off';
+    const brightness = document.getElementById(`${button.id}-brightness`).value;
+    const temperature = document.getElementById(`${button.id}-temperature`).value;
+
+    fetch(`http://192.168.1.100:19999/?ip=${ip}&status=${status}&temperature=${temperature}&brightness=${brightness}`)
+      .then(response => response.json())
+      .catch(error => console.error('Error:', error));
+  }
 </script>
 </body>
 </html>

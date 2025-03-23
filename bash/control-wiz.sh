@@ -35,7 +35,7 @@ process_lamp() {
 
     # Variáveis para construir o comando
     local has_commands=false
-    local params="{\"state\":true}"
+    local params="{\"state\": true"
 
     # Loop pelos argumentos até encontrar outro -i ou acabarem os argumentos
     while [ $# -gt 0 ]; do
@@ -46,12 +46,12 @@ process_lamp() {
                 ;;
             # Comandos de estado
             -on|--on)
-                params="{\"state\":true}"
+                params="{\"state\": true"
                 has_commands=true
                 shift
                 ;;
             -off|--off)
-                params="{\"state\":false}"
+                params="{\"state\": false"
                 has_commands=true
                 shift
                 ;;
@@ -64,13 +64,7 @@ process_lamp() {
 
                 if [ "$2" -ge 0 ] && [ "$2" -le 100 ]; then
                     # Extrai o estado atual do params para manter
-                    local state_part
-                    if [[ "$params" == *"\"state\":false"* ]]; then
-                        state_part="\"state\":false"
-                    else
-                        state_part="\"state\":true"
-                    fi
-                    params="{$state_part,\"dimming\":$2}"
+                    params="$params, \"dimming\":$2"
                     has_commands=true
                 else
                     echo "❌ Erro: Brilho deve ser entre 0 e 100"
@@ -86,50 +80,13 @@ process_lamp() {
                 fi
 
                 if [ "$2" -ge 2200 ] && [ "$2" -le 6500 ]; then
-                    # Extrai o estado atual do params para manter
-                    local state_part
-                    if [[ "$params" == *"\"state\":false"* ]]; then
-                        state_part="\"state\":false"
-                    else
-                        state_part="\"state\":true"
-                    fi
-                    params="{$state_part,\"temp\":$2}"
+                    params="$params, \"temp\":$2"
                     has_commands=true
                 else
                     echo "❌ Erro: Temperatura deve ser entre 2200K e 6500K"
                     return 1
                 fi
                 shift 2
-                ;;
-            # Comando RGB
-            -c|--color)
-                if [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] ||
-                   ! [[ "$2" =~ ^[0-9]+$ ]] || ! [[ "$3" =~ ^[0-9]+$ ]] || ! [[ "$4" =~ ^[0-9]+$ ]]; then
-                    echo "❌ Erro: Valores RGB inválidos ou insuficientes após -c"
-                    return 1
-                fi
-
-                local R=$2
-                local G=$3
-                local B=$4
-
-                if [ "$R" -ge 0 ] && [ "$R" -le 255 ] &&
-                   [ "$G" -ge 0 ] && [ "$G" -le 255 ] &&
-                   [ "$B" -ge 0 ] && [ "$B" -le 255 ]; then
-                    # Extrai o estado atual do params para manter
-                    local state_part
-                    if [[ "$params" == *"\"state\":false"* ]]; then
-                        state_part="\"state\":false"
-                    else
-                        state_part="\"state\":true"
-                    fi
-                    params="{$state_part,\"r\":$R,\"g\":$G,\"b\":$B}"
-                    has_commands=true
-                else
-                    echo "❌ Erro: Valores RGB devem ser entre 0 e 255"
-                    return 1
-                fi
-                shift 4
                 ;;
             # Comando de status
             -s|--status)
@@ -146,7 +103,7 @@ process_lamp() {
 
     # Envia comando acumulado, se houver
     if [ "$has_commands" = true ]; then
-        local command_json="{\"method\":\"setPilot\",\"params\":$params}"
+        local command_json="{\"method\":\"setPilot\",\"params\":$params}}"
         send_command "$ip" "$command_json"
     fi
 
