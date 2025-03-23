@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Automation Dashboard</title>
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          font-family: Arial, sans-serif;
+      }
+
+      .dashboard {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+      }
+
+      .button {
+          flex: 1;
+          border: none;
+          font-size: 24px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+          padding: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .button.on {
+          background-color: #444 !important;
+          color: white;
+      }
+
+      .button.off {
+          background-color: #333;
+          color: white;
+      }
+
+      #leitura {
+          background-color: #333;
+      }
+
+      #bar {
+          background-color: #333;
+      }
+
+      #balcao {
+          background-color: #333;
+      }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <button id="leitura" class="button off" value="192.168.1.250">Leitura</button>
+  <button id="bar" class="button off" value="192.168.1.147">Bar</button>
+  <button id="balcao" class="button off" value="192.168.1.109">Balcão</button>
+</div>
+
+<script>
+  document.querySelectorAll('.button').forEach(button => {
+    button.addEventListener('click', function () {
+      this.classList.toggle('on');
+      this.classList.toggle('off');
+
+      // Here you would typically send a request to your home automation system
+      console.log(`${this.id} light is now ${this.classList.contains('on') ? 'ON' : 'OFF'}`);
+      const on = this.classList.contains('on');
+      const ip = this.value;
+      fetch(`http://192.168.1.100:19999/?ip=${ip}&on=${+on}`)
+        .then(response => response.json())
+        .then(data => console.log(data));
+    });
+  });
+</script>
+</body>
+</html>
